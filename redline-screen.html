@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>السعودية خط أحمر — شاشة عرض</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#E10600; --red-glow:rgba(225,6,0,.55);
+  --green:#006C35; --gold:#C8A951; --ink:#040705; --muted:#9fb0a6;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:#fff;font-family:'Tajawal',sans-serif;
+  -webkit-font-smoothing:antialiased;cursor:none;user-select:none}
+#bg{position:fixed;inset:0;z-index:0}
+.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 50%,rgba(0,108,53,.28),transparent 60%),
+             radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,.75))}
+
+/* ===== Scenes ===== */
+.scene{position:fixed;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:6vmin;opacity:0;visibility:hidden;transition:opacity 1.1s ease,visibility 1.1s}
+.scene.on{opacity:1;visibility:visible}
+
+/* Shared animated pieces (replay each time scene turns on) */
+.a{opacity:0;transform:translateY(6vmin)}
+.scene.on .a{animation:up 1.2s cubic-bezier(.2,.8,.2,1) forwards}
+.scene.on .d1{animation-delay:.3s}.scene.on .d2{animation-delay:.7s}.scene.on .d3{animation-delay:1.1s}
+.scene.on .d4{animation-delay:1.5s}.scene.on .d5{animation-delay:1.9s}.scene.on .d6{animation-delay:2.3s}
+@keyframes up{to{opacity:1;transform:none}}
+
+.eyebrow{font-size:3vmin;letter-spacing:.4em;color:var(--gold)}
+.kufi{font-family:'Reem Kufi',sans-serif;font-weight:700;line-height:1.05}
+.red{color:var(--red);text-shadow:0 0 3vmin var(--red-glow),0 0 8vmin var(--red-glow)}
+.gold{color:var(--gold)}
+
+/* Red slash line */
+.slash{position:relative;height:1.1vmin;width:70vmin;margin:4vmin auto 0}
+.slash::before{content:"";position:absolute;top:0;right:0;height:100%;width:0;background:var(--red);border-radius:1vmin;
+  box-shadow:0 0 2vmin var(--red),0 0 6vmin var(--red-glow)}
+.scene.on .slash::before{animation:draw 1.4s 1.3s cubic-bezier(.7,0,.2,1) forwards}
+.slash::after{content:"";position:absolute;top:-1vmin;right:0;width:3vmin;height:3vmin;border-radius:50%;background:#fff;opacity:0;
+  box-shadow:0 0 3vmin #fff,0 0 6vmin var(--red)}
+.scene.on .slash::after{animation:spark 1.4s 1.3s cubic-bezier(.7,0,.2,1) forwards}
+@keyframes draw{to{width:100%}}
+@keyframes spark{0%{right:0;opacity:1}90%{opacity:1}100%{right:calc(100% - 3vmin);opacity:0}}
+
+/* Scene 1 */
+.s1 .w1{font-size:19vmin}
+.s1 .w2{font-size:14vmin;margin-top:1vmin}
+
+/* Scene 2 — statement */
+.statement{font-size:7.5vmin;font-weight:300;line-height:1.7;max-width:85vw}
+.statement b{font-weight:900}
+
+/* Scene 3 — pillars */
+.pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:2.4vmin;width:min(92vw,170vmin);margin-top:5vmin}
+.pillar{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-top:.7vmin solid var(--red);
+  border-radius:2.4vmin;padding:4.5vmin 3vmin;backdrop-filter:blur(6px)}
+.pillar .num{font-family:'Reem Kufi';font-size:8vmin;color:transparent;-webkit-text-stroke:2px rgba(225,6,0,.75);line-height:1}
+.pillar h3{font-size:4.4vmin;margin:2.4vmin 0 1.4vmin}
+.pillar p{font-size:2.8vmin;color:var(--muted);line-height:1.7}
+.h2{font-size:9vmin}
+
+/* Scene 4 — ones */
+.ones{display:flex;gap:7vmin;justify-content:center;flex-wrap:wrap}
+.one b{display:block;font-family:'Reem Kufi';font-size:22vmin;line-height:1}
+.one span{font-size:5vmin;color:var(--muted)}
+
+/* Scene 5 — code */
+.terminal{width:min(88vw,150vmin);background:#020403;border:1px solid rgba(255,255,255,.1);border-radius:2vmin;overflow:hidden;
+  direction:ltr;text-align:left;box-shadow:0 4vmin 10vmin rgba(0,0,0,.6),0 0 0 1px rgba(225,6,0,.12)}
+.bar{display:flex;align-items:center;gap:1.2vmin;padding:1.8vmin 2.4vmin;background:#07100b;border-bottom:1px solid rgba(255,255,255,.08)}
+.bar i{width:1.6vmin;height:1.6vmin;border-radius:50%}
+.bar i:nth-child(1){background:#ff5f56}.bar i:nth-child(2){background:#ffbd2e}.bar i:nth-child(3){background:#27c93f}
+.bar span{margin-left:auto;color:#5f7a6b;font:2vmin monospace}
+pre{padding:3.4vmin 4vmin;font:3.3vmin/1.75 Consolas,'Courier New',monospace;min-height:62vmin;white-space:pre-wrap;color:#cfe8da}
+.k{color:#ff6b6b}.s{color:#7ee2a8}.c{color:#4f6b5c;font-style:italic}.f{color:var(--gold)}.r{color:var(--red);font-weight:700}
+.cursor{display:inline-block;width:1.4vmin;height:3.4vmin;vertical-align:-.6vmin;background:var(--red);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* Scene 6 — closing */
+.s6 .pray{font-size:7vmin;font-weight:300;margin-top:3vmin}
+.s6 .big{font-size:16vmin}
+
+/* ===== Persistent chrome ===== */
+.ticker{position:fixed;bottom:0;left:0;right:0;z-index:3;background:var(--red);overflow:hidden;white-space:nowrap;
+  padding:1.6vmin 0;box-shadow:0 0 5vmin var(--red-glow)}
+.track{display:inline-flex;animation:scroll 40s linear infinite}
+.track span{font-family:'Reem Kufi';font-size:3.6vmin;font-weight:700;padding:0 3.5vmin}
+.track .dot{opacity:.55;padding:0}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(50%)}}
+
+.corner{position:fixed;top:3vmin;z-index:3;font-size:2.6vmin;color:rgba(255,255,255,.75)}
+.corner.r{right:4vmin}.corner.l{left:4vmin;direction:ltr;font-variant-numeric:tabular-nums}
+.corner.r b{color:var(--red)}
+
+.progress{position:fixed;top:0;right:0;height:.5vmin;background:var(--red);z-index:4;width:0;box-shadow:0 0 2vmin var(--red)}
+.dots{position:fixed;bottom:9vmin;left:50%;transform:translateX(-50%);display:flex;gap:1.2vmin;z-index:3}
+.dots i{width:1.2vmin;height:1.2vmin;border-radius:50%;background:rgba(255,255,255,.25);transition:.4s}
+.dots i.on{background:var(--red);width:3.6vmin;border-radius:1vmin}
+
+/* Start overlay (needed once for fullscreen) */
+#start{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3vmin;
+  background:rgba(4,7,5,.92);cursor:pointer;transition:opacity .6s}
+#start.hide{opacity:0;pointer-events:none}
+#start .play{width:18vmin;height:18vmin;border-radius:50%;background:var(--red);display:grid;place-items:center;
+  box-shadow:0 0 0 0 var(--red-glow);animation:pulse 2s infinite}
+#start .play::after{content:"";border-style:solid;border-width:4vmin 0 4vmin 6.5vmin;border-color:transparent transparent transparent #fff;margin-left:1.5vmin}
+#start p{font-size:3.4vmin}
+#start small{font-size:2.2vmin;color:var(--muted);line-height:1.9;text-align:center}
+@keyframes pulse{70%{box-shadow:0 0 0 5vmin rgba(225,6,0,0)}100%{box-shadow:0 0 0 0 rgba(225,6,0,0)}}
+
+/* Portrait screens (vertical kiosks) */
+@media (orientation:portrait){
+  .pillars{grid-template-columns:1fr 1fr;width:92vw}
+  .s1 .w1{font-size:21vw}.s1 .w2{font-size:16vw}
+  .statement{font-size:7vw}
+  pre{font-size:3.2vw}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+<div class="vignette"></div>
+<div class="progress" id="progress"></div>
+
+<div class="corner r"><b>السعودية خطٌّ أحمر</b></div>
+<div class="corner l" id="clock"></div>
+
+<!-- 1 -->
+<section class="scene s1">
+  <div class="eyebrow a d1">ولاءٌ · ثبات · وحدة</div>
+  <div class="kufi w1 a d2">السعودية</div>
+  <div class="kufi w2 red a d3">خطٌّ أحمر</div>
+  <div class="slash"></div>
+</section>
+
+<!-- 2 -->
+<section class="scene s2">
+  <p class="statement a d1">في كل الظروف…</p>
+  <p class="statement a d3">نقف <b class="gold">صفًّا واحدًا</b> خلف قيادتنا</p>
+  <p class="statement a d5">وأمن وطننا <b class="red">لا يقبل المساس</b></p>
+</section>
+
+<!-- 3 -->
+<section class="scene s3">
+  <div class="kufi h2 a d1">ثوابت <span class="red">لا تتغيّر</span></div>
+  <div class="pillars">
+    <div class="pillar a d2"><div class="num">01</div><h3>خلف القيادة</h3><p>نثق في حكمتها ونلتفّ حولها في كل حين</p></div>
+    <div class="pillar a d3"><div class="num">02</div><h3>أمن الوطن</h3><p>فوق كل اعتبار… ونحن جميعًا حرّاسه</p></div>
+    <div class="pillar a d4"><div class="num">03</div><h3>وعيٌ رقمي</h3><p>نتحرّى المصادر الرسمية ونرفض الشائعات</p></div>
+    <div class="pillar a d5"><div class="num">04</div><h3>نبني ونعمل</h3><p>كلٌّ في مجاله… نرفع اسم الوطن عاليًا</p></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="scene s4">
+  <div class="ones">
+    <div class="one a d1"><b class="red">١</b><span>وطن</span></div>
+    <div class="one a d2"><b>١</b><span>قيادة</span></div>
+    <div class="one a d3"><b>١</b><span>صفّ</span></div>
+    <div class="one a d4"><b class="red">∞</b><span>ولاء</span></div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="scene s5">
+  <div class="terminal a d1">
+    <div class="bar"><i></i><i></i><i></i><span>redline.js</span></div>
+    <pre id="code"></pre>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="scene s6">
+  <div class="kufi big a d1">معك يا <span class="red">وطن</span></div>
+  <div class="slash"></div>
+  <p class="pray a d4">حفظ الله المملكة العربية السعودية… قيادةً وشعبًا</p>
+</section>
+
+<div class="dots" id="dots"></div>
+
+<div class="ticker"><div class="track" id="track"></div></div>
+
+<div id="start">
+  <div class="play"></div>
+  <p>اضغط لبدء العرض بملء الشاشة</p>
+  <small>يعمل العرض تلقائيًا ويتكرر بلا توقف<br>مفاتيح: ← → للتنقل · F ملء الشاشة · مسافة إيقاف/تشغيل</small>
+</div>
+
+<script>
+/* ===== Settings ===== */
+const DURATIONS = [9000, 9000, 11000, 8000, 16000, 9000]; // ms per scene
+const ORG = ''; // اكتبي هنا اسم المدرسة أو الجهة العارضة ليظهر أعلى الشاشة
+document.querySelector('.corner.r').innerHTML = (ORG ? ORG + ' · ' : '') + '<b>السعودية خطٌّ أحمر</b>';
+
+/* ===== Background network ===== */
+(() => {
+  const c = document.getElementById('bg'), x = c.getContext('2d');
+  let w, h, pts = [], t = 0, dpr = Math.min(devicePixelRatio || 1, 2);
+  function size() {
+    w = c.width = innerWidth * dpr; h = c.height = innerHeight * dpr;
+    c.style.width = innerWidth + 'px'; c.style.height = innerHeight + 'px';
+    const n = Math.min(90, Math.floor(innerWidth / 22));
+    pts = Array.from({ length: n }, () => ({ x: Math.random() * w, y: Math.random() * h,
+      vx: (Math.random() - .5) * .4 * dpr, vy: (Math.random() - .5) * .4 * dpr }));
+  }
+  function frame() {
+    x.clearRect(0, 0, w, h);
+    const max = Math.min(w, h) * .18;
+    for (const p of pts) { p.x += p.vx; p.y += p.vy; if (p.x < 0 || p.x > w) p.vx *= -1; if (p.y < 0 || p.y > h) p.vy *= -1; }
+    x.lineWidth = dpr;
+    for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
+      const a = pts[i], b = pts[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d < max) { x.strokeStyle = `rgba(0,168,84,${.2 * (1 - d / max)})`; x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke(); }
+    }
+    x.fillStyle = 'rgba(255,255,255,.55)';
+    for (const p of pts) { x.beginPath(); x.arc(p.x, p.y, 1.6 * dpr, 0, 7); x.fill(); }
+    t += .003; const y = (Math.sin(t) * .5 + .5) * h;
+    const g = x.createLinearGradient(0, 0, w, 0);
+    g.addColorStop(0, 'rgba(225,6,0,0)'); g.addColorStop(.5, 'rgba(225,6,0,.4)'); g.addColorStop(1, 'rgba(225,6,0,0)');
+    x.fillStyle = g; x.fillRect(0, y, w, 2 * dpr);
+    requestAnimationFrame(frame);
+  }
+  size(); frame(); addEventListener('resize', size);
+})();
+
+/* ===== Ticker ===== */
+(() => {
+  const words = ['السعودية خطٌّ أحمر', '✦', 'معك يا وطن', '✦', 'صفٌّ واحد خلف قيادتنا', '✦', 'أمن الوطن أولًا', '✦', 'حفظ الله المملكة', '✦'];
+  document.getElementById('track').innerHTML = words.map(s => `<span class="${s === '✦' ? 'dot' : ''}">${s}</span>`).join('').repeat(5);
+})();
+
+/* ===== Clock ===== */
+function tick() {
+  const d = new Date();
+  document.getElementById('clock').textContent =
+    d.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) + '  ·  ' +
+    d.toLocaleDateString('ar-SA-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+tick(); setInterval(tick, 30000);
+
+/* ===== Code typing (scene 5) ===== */
+const CODE = [
+  ['c', '// redline.js — ثوابت لا تقبل التعديل\n\n'],
+  ['k', 'const '], ['', 'HOMELAND = '], ['f', 'Object.freeze'], ['', '({\n'],
+  ['', '  name: '], ['s', '"المملكة العربية السعودية"'], ['', ',\n'],
+  ['', '  status: '], ['r', '"RED_LINE"'], ['', ',\n'],
+  ['', '  loyalty: '], ['s', 'Infinity'], ['', '\n});\n\n'],
+  ['k', 'if '], ['', '(threat.targets(HOMELAND))\n'],
+  ['', '  '], ['k', 'throw new '], ['f', 'Error'], ['', '('], ['r', '"خطٌّ أحمر"'], ['', ');\n\n'],
+  ['k', 'while '], ['', '('], ['s', 'true'], ['', ') {\n'],
+  ['', '  stand.'], ['f', 'with'], ['', '(leadership);\n'],
+  ['', '  '], ['f', 'protect'], ['', '(unity);\n}\n\n'],
+  ['c', '// > '], ['s', 'السعودية خطٌّ أحمر ✓']
+];
+let typeTimer;
+function typeCode() {
+  const pre = document.getElementById('code');
+  clearTimeout(typeTimer); pre.innerHTML = '';
+  const cur = document.createElement('span'); cur.className = 'cursor'; pre.appendChild(cur);
+  let i = 0, j = 0, sp;
+  (function step() {
+    if (i >= CODE.length) return;
+    const [cls, txt] = CODE[i];
+    if (j === 0) { sp = document.createElement('span'); if (cls) sp.className = cls; pre.insertBefore(sp, cur); }
+    sp.textContent += txt[j++];
+    if (j >= txt.length) { i++; j = 0; }
+    typeTimer = setTimeout(step, txt[j - 1] === '\n' ? 110 : 30);
+  })();
+}
+
+/* ===== Slideshow engine ===== */
+const scenes = [...document.querySelectorAll('.scene')];
+const dotsEl = document.getElementById('dots');
+scenes.forEach(() => dotsEl.appendChild(document.createElement('i')));
+const dots = [...dotsEl.children];
+const bar = document.getElementById('progress');
+let cur = -1, timer, paused = false, startAt = 0, remain = 0;
+
+function show(i) {
+  cur = (i + scenes.length) % scenes.length;
+  scenes.forEach((s, k) => { s.classList.remove('on'); dots[k].classList.toggle('on', k === cur); });
+  void scenes[cur].offsetWidth; // restart CSS animations
+  scenes[cur].classList.add('on');
+  if (cur === 4) setTimeout(typeCode, 900);
+  schedule(DURATIONS[cur]);
+}
+function schedule(ms) {
+  clearTimeout(timer); remain = ms; startAt = performance.now();
+  bar.style.transition = 'none'; bar.style.width = (100 * (1 - ms / DURATIONS[cur])) + '%';
+  void bar.offsetWidth; bar.style.transition = `width ${ms}ms linear`; bar.style.width = '100%';
+  timer = setTimeout(() => show(cur + 1), ms);
+}
+function togglePause() {
+  paused = !paused;
+  if (paused) { clearTimeout(timer); remain -= performance.now() - startAt;
+    bar.style.width = getComputedStyle(bar).width; bar.style.transition = 'none'; }
+  else schedule(remain);
+}
+
+/* ===== Start / fullscreen / wake lock ===== */
+let wake;
+async function keepAwake() { try { wake = await navigator.wakeLock.request('screen'); } catch (e) {} }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
+function fs() { const el = document.documentElement;
+  (document.fullscreenElement ? document.exitFullscreen() : (el.requestFullscreen || el.webkitRequestFullscreen).call(el))?.catch?.(() => {}); }
+
+let started = false;
+function start() {
+  if (started) return; started = true;
+  document.getElementById('start').classList.add('hide');
+  if (!document.fullscreenElement) fs();
+  keepAwake(); show(0);
+}
+document.getElementById('start').addEventListener('click', start);
+// يبدأ تلقائيًا بعد 6 ثوانٍ حتى لو لم يضغط أحد (مناسب للشاشات بدون فأرة)
+setTimeout(start, 6000);
+
+addEventListener('keydown', e => {
+  if (!started) { start(); return; }
+  if (e.key === 'ArrowLeft') show(cur + 1);
+  else if (e.key === 'ArrowRight') show(cur - 1);
+  else if (e.key === ' ') { e.preventDefault(); togglePause(); }
+  else if (e.key.toLowerCase() === 'f') fs();
+});
+</script>
+</body>
+</html>
