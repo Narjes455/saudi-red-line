@@ -11,7 +11,7 @@
   --green:#006C35; --gold:#C8A951; --ink:#040705; --muted:#9fb0a6;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:#fff;font-family:'Tajawal',sans-serif;
+html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--ink);color:#fff;font-family:'Tajawal',sans-serif;
   -webkit-font-smoothing:antialiased;cursor:none;user-select:none}
 #bg{position:fixed;inset:0;z-index:0}
 .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
@@ -304,17 +304,28 @@ function togglePause() {
 
 /* ===== Start / fullscreen / wake lock ===== */
 let wake;
-async function keepAwake() { try { wake = await navigator.wakeLock.request('screen'); } catch (e) {} }
+async function keepAwake() { try { if (navigator.wakeLock) wake = await navigator.wakeLock.request('screen'); } catch (e) {} }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
-function fs() { const el = document.documentElement;
-  (document.fullscreenElement ? document.exitFullscreen() : (el.requestFullscreen || el.webkitRequestFullscreen).call(el))?.catch?.(() => {}); }
+function fs() {
+  // الآيفون لا يدعم ملء الشاشة للصفحات، فنتجاهله بأمان بدل أن يتوقف العرض
+  try {
+    const el = document.documentElement;
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      const ex = document.exitFullscreen || document.webkitExitFullscreen;
+      if (ex) { const p = ex.call(document); if (p && p.catch) p.catch(() => {}); }
+    } else {
+      const req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) { const p = req.call(el); if (p && p.catch) p.catch(() => {}); }
+    }
+  } catch (e) {}
+}
 
 let started = false;
 function start() {
   if (started) return; started = true;
   document.getElementById('start').classList.add('hide');
-  if (!document.fullscreenElement) fs();
-  keepAwake(); show(0);
+  show(0);           // نبدأ العرض أولًا
+  fs(); keepAwake(); // ثم نحاول ملء الشاشة ومنع السكون إن كان مدعومًا
 }
 document.getElementById('start').addEventListener('click', start);
 // يبدأ تلقائيًا بعد 6 ثوانٍ حتى لو لم يضغط أحد (مناسب للشاشات بدون فأرة)
